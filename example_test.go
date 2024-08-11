@@ -8,7 +8,7 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"go.opentelemetry.io/contrib/bridges/otelzerolog"
+	"github.com/arfan21/otelzerolog"
 	"go.opentelemetry.io/otel/log/noop"
 )
 

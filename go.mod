@@ -1,4 +1,4 @@
-module go.opentelemetry.io/contrib/bridges/otelzerolog
+module github.com/arfan21/otelzerolog
 
 go 1.21
 
