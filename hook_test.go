@@ -135,6 +135,7 @@ func TestHookRun(t *testing.T) {
 		assert.Equal(t, testMessage, got.Body().AsString())
 		assert.Equal(t, log.SeverityInfo, got.Severity())
 		assert.Equal(t, zerolog.InfoLevel.String(), got.SeverityText())
+		assert.Equal(t, 2, got.AttributesLen())
 	})
 }
 

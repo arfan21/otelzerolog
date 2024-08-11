@@ -142,6 +142,8 @@ func (h Hook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
 		attributes = append(attributes, convertAttribute(k, v)...)
 	}
 
+	r.AddAttributes(attributes...)
+
 	h.logger.Emit(e.GetCtx(), r)
 }
 
