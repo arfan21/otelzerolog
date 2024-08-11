@@ -28,6 +28,10 @@
 package otelzerolog // import "go.opentelemetry.io/contrib/bridges/otelzerolog"
 
 import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+
 	"github.com/rs/zerolog"
 
 	"go.opentelemetry.io/otel/log"
@@ -129,6 +133,14 @@ func (h Hook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
 	// TODO: add support for attributes
 	// This is limited by zerolog's inability to retrieve fields.
 	// https://github.com/rs/zerolog/issues/493
+	logData := make(map[string]interface{})
+	// create a string that appends } to the end of the buf variable you access via reflection
+	ev := fmt.Sprintf("%s}", reflect.ValueOf(e).Elem().FieldByName("buf"))
+	_ = json.Unmarshal([]byte(ev), &logData)
+	var attributes []log.KeyValue
+	for k, v := range logData {
+		attributes = append(attributes, convertAttribute(k, v)...)
+	}
 
 	h.logger.Emit(e.GetCtx(), r)
 }
@@ -149,5 +161,22 @@ func convertLevel(level zerolog.Level) log.Severity {
 		return log.SeverityFatal2
 	default:
 		return log.SeverityUndefined
+	}
+}
+
+func convertAttribute(k string, v interface{}) []log.KeyValue {
+	switch val := v.(type) {
+	case string:
+		return []log.KeyValue{log.String(k, val)}
+	case bool:
+		return []log.KeyValue{log.Bool(k, val)}
+	case int:
+		return []log.KeyValue{log.Int(k, val)}
+	case int64:
+		return []log.KeyValue{log.Int64(k, val)}
+	case float64:
+		return []log.KeyValue{log.Float64(k, val)}
+	default:
+		return []log.KeyValue{log.String(k, fmt.Sprintf("%v", val))}
 	}
 }

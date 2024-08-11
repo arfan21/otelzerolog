@@ -3,6 +3,7 @@
 package otelzerolog
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -199,5 +200,58 @@ func BenchmarkHookRun(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		hook.Run(event, level, msg)
+	}
+}
+
+func TestConvertAttribute(t *testing.T) {
+	tests := []struct {
+		name     string
+		key      string
+		value    interface{}
+		expected []log.KeyValue
+	}{
+		{
+			name:     "string value",
+			key:      "key1",
+			value:    "value1",
+			expected: []log.KeyValue{log.String("key1", "value1")},
+		},
+		{
+			name:     "bool value",
+			key:      "key2",
+			value:    true,
+			expected: []log.KeyValue{log.Bool("key2", true)},
+		},
+		{
+			name:     "int value",
+			key:      "key3",
+			value:    123,
+			expected: []log.KeyValue{log.Int("key3", 123)},
+		},
+		{
+			name:     "int64 value",
+			key:      "key4",
+			value:    int64(1234567890),
+			expected: []log.KeyValue{log.Int64("key4", 1234567890)},
+		},
+		{
+			name:     "float64 value",
+			key:      "key5",
+			value:    123.456,
+			expected: []log.KeyValue{log.Float64("key5", 123.456)},
+		},
+		{
+			name:     "default case",
+			key:      "key6",
+			value:    []int{1, 2, 3},
+			expected: []log.KeyValue{log.String("key6", fmt.Sprintf("%v", []int{1, 2, 3}))},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := convertAttribute(tt.key, tt.value)
+			assert.Equal(t, tt.expected, actual)
+		})
 	}
 }
